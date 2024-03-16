@@ -1,0 +1,23 @@
+ydl_opts = {
+    'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+    'quiet': 'True'
+}
+with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+  info = ydl.extract_info("https://www.youtube.com/channel/UCZ84hN7gmZgd2J994l0HD5A", 
+                          download=False)
+  ids_videos = ydl.extract_info("https://www.youtube.com/@cmo57/videos", 
+                                download=False)
+  if info is not None and isinstance(info, dict):
+    if "entries" in info:
+        for entry in info.get('entries', []):
+            print(entry['title'])
+            print(entry['webpage_url'])
+    else:
+        print("No 'entries' found in info")
+  else:
+    print("Info is None or not a dictionary")
