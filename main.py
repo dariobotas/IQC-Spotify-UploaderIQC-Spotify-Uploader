@@ -10,9 +10,11 @@ from selenium.common.exceptions import (
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.edge.service import Service
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 def list_channel_videos(channel_url):
+    video_urls = []
     driver_service = ""
     options = Options()
     options.add_argument("--headless")
@@ -45,12 +47,22 @@ def list_channel_videos(channel_url):
                 "//button[contains(@aria-label,'Rejeitar tudo')]//span[contains(text(),'Rejeitar tudo')]")
             if youtube_consent.is_displayed():
                 youtube_consent.click()
-            for _ in range(5):  # Scroll down 5 times (adjust as needed)
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                time.sleep(2)  # Add a delay to allow more videos to load
+
+            last_height = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
+            actions = ActionChains(driver)
+            while True:
+                # Scroll down
+                actions.scroll_by_amount(0, 10000).perform()
+                time.sleep(2)
+                new_height = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
+                if len(new_height) == len(last_height):
+                    break  # No new content, stop scrolling
+
+                last_height = new_height
 
             youtube_video_elements = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
-            video_urls = [video_element.get_attribute('href') for video_element in youtube_video_elements]
+            video_urls = [video_element.get_attribute('href')
+                                                for video_element in youtube_video_elements]
 
             driver.quit()
 
@@ -62,5 +74,5 @@ cmo_videos = "https://www.youtube.com/@cmo57/videos"
 videos = list_channel_videos(cmo_videos)
 
 print(len(videos))
-for video in videos:
-    print(video)
+for i, video in enumerate(videos):
+    print(f"{i+1}: {video}")
