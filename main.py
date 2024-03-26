@@ -41,23 +41,26 @@ def list_channel_videos(channel_url):
             driver.close()
             return "404"
         else:
-            # Scroll down to load more videos (This step may vary based on the channel layout)
+            # Click consent if it is displayed
             youtube_consent = driver.find_element(
                 By.XPATH,
                 "//button[contains(@aria-label,'Rejeitar tudo')]//span[contains(text(),'Rejeitar tudo')]")
             if youtube_consent.is_displayed():
                 youtube_consent.click()
 
+            # Scroll down to load more videos (This step may vary based on the channel layout)
             last_height = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
             actions = ActionChains(driver)
             while True:
                 # Scroll down
                 actions.scroll_by_amount(0, 10000).perform()
                 time.sleep(2)
+                # Check the video content on the page
                 new_height = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
+                # To verify if we load all the content
                 if len(new_height) == len(last_height):
                     break  # No new content, stop scrolling
-
+                # We have more content to load, need to scroll to check if there is more
                 last_height = new_height
 
             youtube_video_elements = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
