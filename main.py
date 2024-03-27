@@ -65,11 +65,17 @@ def list_channel_videos(channel_url):
 
             youtube_video_elements = driver.find_elements(By.XPATH, '//*[@id="video-title-link"]')
             video_urls = [video_element.get_attribute('href')
-                                                for video_element in youtube_video_elements]
+                          for video_element in youtube_video_elements]
+            video_titles = [video_element.get_attribute('title')
+                          for video_element in youtube_video_elements]
+            videos_dict = {
+                title: url
+                for title, url in zip(video_titles, video_urls)
+            }
 
             driver.quit()
 
-            return video_urls
+            return videos_dict
 
 
 channel_youtube_url = "https://www.youtube.com/channel/UCZ84hN7gmZgd2J994l0HD5A"
@@ -77,5 +83,4 @@ cmo_videos = "https://www.youtube.com/@cmo57/videos"
 videos = list_channel_videos(cmo_videos)
 
 print(len(videos))
-for i, video in enumerate(videos):
-    print(f"{i+1}: {video}")
+print(videos)
