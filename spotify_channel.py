@@ -1,7 +1,6 @@
 import json
 import time
 from enum import Enum
-from pytube import YouTube
 from sys import platform
 
 from selenium import webdriver
@@ -14,6 +13,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class ContentType(Enum):
@@ -32,6 +33,8 @@ class SpotifyChannel:
         self.promotional_content = False
         self.season = 1
         self.episode = 0
+        self.driver = None
+        self.wait = None
 
     @property
     def file_title(self):
@@ -65,20 +68,28 @@ class SpotifyChannel:
     def publication_date(self, value):
         self._publication_date = value
 
-    def access_spotify(self):
+    def _create_driver(self):
         driver_service = ""
         options = Options()
-        #options.add_argument("--headless")
+        # options.add_argument("--headless")
 
         if platform == "linux" or platform == "linux2":
             driver_service = Service(r'/snap/bin/geckodriver')  # for linux systems
         elif platform == "win32" or platform == "win64":
             driver_service = Service()  # for Windows systems
 
-        driver = webdriver.Edge(service=driver_service,
-                                options=options)  # Update this with the path to your webdriver executable
+        self.driver = webdriver.Edge(service=driver_service,
+                                     options=options)  # Update this with the path to your webdriver executable
+
+    def _access_spotify(self):
+        if self.driver is None:
+            self._create_driver()
+
+        if self.wait is None:
+            self.wait = WebDriverWait(self.driver, 10)
+
         try:
-            driver.get(self.channel_url)
+            self.driver.get(self.channel_url)
         except TimeoutError as timeout_error:
             print(f"Timeout error: {timeout_error}")
         except TimeoutException as time_out_exception:
@@ -88,8 +99,42 @@ class SpotifyChannel:
         except WebDriverException as webdriver_exception:
             print(f"{webdriver_exception}URL: {self.channel_url}\n")
         else:
-            if "404" in driver.title:
-                driver.close()
+            if "404" in self.driver.title:
+                self.driver.close()
                 return "404"
+            else:
+                self.wait.until(EC.visibility_of_element_located((By.XPATH,
+                                                                  "//h1[@class='Type__TypeElement-sc-goli3j-0 gMYMSv']")))
+                self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@id=\"onetrust-policy-title\"]")))
+                if self.driver.find_element(By.XPATH, "//*[@id=\"onetrust-policy-title\"]").is_displayed():
+                    self.driver.find_element(By.XPATH,
+                                             "//button[@id=\"onetrust-accept-btn-handler\" and text("
+                                             ")=\"Permitir tudo\"]").click()
+                return "200"
 
+    def login_spotify(self, username, password):
+        if self._access_spotify() == "200":
+            self.wait.until(EC.visibility_of_element_located((By.XPATH, "//button[@class='Button-sc-qlcn5g-0 jxHXTK']")))
+            # Click on the button "Continuar com o Spotify"
+            self.driver.find_element(By.XPATH, "//button[@class='Button-sc-qlcn5g-0 jxHXTK']").click()
+            # Wait until the login form is shown on the screen
+            self.wait.until(EC.visibility_of_element_located((By.XPATH,
+                                                              "//h1[@class=\"Type__TypeElement-sc-goli3j-0 jaaEvK "
+                                                              "sc-bqWxrE gmSfcE\" and text()=\"Iniciar sessão no "
+                                                              "Spotify\"]")))
+            # Fill the field with the username, password and click login button
+            self.driver.find_element(By.XPATH, "//input[@id='login-username']").send_keys(username)
+            self.driver.find_element(By.XPATH, "//input[@id='login-password']").send_keys(password)
+            self.driver.find_element(By.XPATH, "//button[@id='login-button']").click()
+            # Check if the screen shows the confirmation of identity
+            self.wait.until(EC.visibility_of_element_located((By.XPATH, "//button[@class='Button-sc-qlcn5g-0 fSDtUf']")))
+            if self.driver.find_element(By.XPATH, "//button[@class='Button-sc-qlcn5g-0 fSDtUf']").is_displayed():
+                self.driver.find_element(By.XPATH, "//button[@class='Button-sc-qlcn5g-0 fSDtUf']").click()
+            # Wait until the title of the dashboard is displayed
+            self.wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='sc-lijSln iwIpQh']")))
+            if self.driver.find_element(By.XPATH, "//div[@class='sc-lijSln iwIpQh']").is_displayed():
+                return self.driver.find_element(By.XPATH, "//div[@class='sc-lijSln iwIpQh']").text
 
+    def close_driver(self):
+        if self.driver is not None:
+            self.driver.quit()
