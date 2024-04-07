@@ -14,7 +14,7 @@ from selenium.webdriver.edge.options import Options
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 
 
 class ContentType(Enum):
@@ -23,6 +23,17 @@ class ContentType(Enum):
 
 
 class SpotifyChannel:
+    _xpath_login_h1 = "//h1[@class='Type__TypeElement-sc-goli3j-0 gMYMSv']"
+    _xpath_onetrust_policy_title = "//*[@id=\"onetrust-policy-title\"]"
+    _xpath_onetrust_policy_button_permit = "//button[@id=\"onetrust-accept-btn-handler\" and text()=\"Permitir tudo\"]"
+    _xpath_continuar_com_spotify_button = "//button[@class='Button-sc-qlcn5g-0 jxHXTK']"
+    _xpath_iniciar_sessao_title: str = "//h1[@class='Type__TypeElement-sc-goli3j-0 jaaEvK sc-bqWxrE gmSfcE']"
+    _xpath_username_input = "//input[@id='login-username']"
+    _xpath_password_input = "//input[@id='login-password']"
+    _xpath_login_button = "//button[@id='login-button']"
+    _xpath_confirmation_identity_button = "//button[@class='Button-sc-qlcn5g-0 fSDtUf']"
+    _xpath_dashboard_title = "//div[@class='sc-lijSln iwIpQh']"
+
     def __init__(self, channel_url):
         self.channel_url = channel_url
         self.file_title = ""
@@ -103,37 +114,31 @@ class SpotifyChannel:
                 self.driver.close()
                 return "404"
             else:
-                self.wait.until(EC.visibility_of_element_located((By.XPATH,
-                                                                  "//h1[@class='Type__TypeElement-sc-goli3j-0 gMYMSv']")))
-                self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@id=\"onetrust-policy-title\"]")))
-                if self.driver.find_element(By.XPATH, "//*[@id=\"onetrust-policy-title\"]").is_displayed():
-                    self.driver.find_element(By.XPATH,
-                                             "//button[@id=\"onetrust-accept-btn-handler\" and text("
-                                             ")=\"Permitir tudo\"]").click()
+                self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_login_h1)))
+                self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_onetrust_policy_title)))
+                if self.driver.find_element(By.XPATH, self._xpath_onetrust_policy_title).is_displayed():
+                    self.driver.find_element(By.XPATH, self._xpath_onetrust_policy_button_permit).click()
                 return "200"
 
     def login_spotify(self, username, password):
         if self._access_spotify() == "200":
-            self.wait.until(EC.visibility_of_element_located((By.XPATH, "//button[@class='Button-sc-qlcn5g-0 jxHXTK']")))
+            self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_continuar_com_spotify_button)))
             # Click on the button "Continuar com o Spotify"
-            self.driver.find_element(By.XPATH, "//button[@class='Button-sc-qlcn5g-0 jxHXTK']").click()
+            self.driver.find_element(By.XPATH, self._xpath_continuar_com_spotify_button).click()
             # Wait until the login form is shown on the screen
-            self.wait.until(EC.visibility_of_element_located((By.XPATH,
-                                                              "//h1[@class=\"Type__TypeElement-sc-goli3j-0 jaaEvK "
-                                                              "sc-bqWxrE gmSfcE\" and text()=\"Iniciar sessão no "
-                                                              "Spotify\"]")))
+            self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_iniciar_sessao_title)))
             # Fill the field with the username, password and click login button
-            self.driver.find_element(By.XPATH, "//input[@id='login-username']").send_keys(username)
-            self.driver.find_element(By.XPATH, "//input[@id='login-password']").send_keys(password)
-            self.driver.find_element(By.XPATH, "//button[@id='login-button']").click()
+            self.driver.find_element(By.XPATH, self._xpath_username_input).send_keys(username)
+            self.driver.find_element(By.XPATH, self._xpath_password_input).send_keys(password)
+            self.driver.find_element(By.XPATH, self._xpath_login_button).click()
             # Check if the screen shows the confirmation of identity
-            self.wait.until(EC.visibility_of_element_located((By.XPATH, "//button[@class='Button-sc-qlcn5g-0 fSDtUf']")))
-            if self.driver.find_element(By.XPATH, "//button[@class='Button-sc-qlcn5g-0 fSDtUf']").is_displayed():
-                self.driver.find_element(By.XPATH, "//button[@class='Button-sc-qlcn5g-0 fSDtUf']").click()
+            self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_confirmation_identity_button)))
+            if self.driver.find_element(By.XPATH, self._xpath_confirmation_identity_button).is_displayed():
+                self.driver.find_element(By.XPATH, self._xpath_confirmation_identity_button).click()
             # Wait until the title of the dashboard is displayed
-            self.wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='sc-lijSln iwIpQh']")))
-            if self.driver.find_element(By.XPATH, "//div[@class='sc-lijSln iwIpQh']").is_displayed():
-                return self.driver.find_element(By.XPATH, "//div[@class='sc-lijSln iwIpQh']").text
+            self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_dashboard_title)))
+            if self.driver.find_element(By.XPATH, self._xpath_dashboard_title).is_displayed():
+                return self.driver.find_element(By.XPATH, self._xpath_dashboard_title).text
 
     def close_driver(self):
         if self.driver is not None:
