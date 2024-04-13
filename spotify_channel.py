@@ -140,6 +140,9 @@ class SpotifyChannel:
             if self.driver.find_element(By.XPATH, self._xpath_dashboard_title).is_displayed():
                 return self.driver.find_element(By.XPATH, self._xpath_dashboard_title).text
 
+    def upload_a_message(self):
+        return null
+
     def close_driver(self):
         if self.driver is not None:
             self.driver.quit()
