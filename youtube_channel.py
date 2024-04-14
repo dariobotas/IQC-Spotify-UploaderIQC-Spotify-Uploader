@@ -24,7 +24,7 @@ class YoutubeChannel:
     def videos_dict(self):
         driver_service = ""
         options = Options()
-        #options.add_argument("--headless")
+        # options.add_argument("--headless")
 
         if platform == "linux" or platform == "linux2":
             driver_service = Service(r'/snap/bin/geckodriver')  # for linux systems
@@ -144,7 +144,7 @@ class YoutubeChannel:
                         try:
                             self.download_a_youtube_video(value)
                             with open(file_path_list, mode="a") as file_list_downloaded:
-                                json.dump({key:value}, file_list_downloaded, indent=4)
+                                json.dump({key: value}, file_list_downloaded, indent=4)
                                 print(f"Video information for '{key}' saved to JSON file.")
                         except Exception as e:
                             print(f"Error downloading video '{value}': {e}")
@@ -159,7 +159,7 @@ class YoutubeChannel:
                             try:
                                 self.download_a_youtube_video(value)
                                 with open(file_path_list, mode="a") as file_list_downloaded:
-                                    json.dump({key:value}, file_list_downloaded, indent=4)
+                                    json.dump({key: value}, file_list_downloaded, indent=4)
                                     print(f"Video information for '{key}' saved to JSON file.")
                             except Exception as e:
                                 print(f"Error downloading video '{value}': {e}")

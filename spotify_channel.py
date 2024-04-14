@@ -17,6 +17,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 
+
 class ContentType(Enum):
     MESSAGE = "Mensagem"
     BIBLE_STUDY = "Estudo Bíblico"
@@ -33,6 +34,37 @@ class SpotifyChannel:
     _xpath_login_button = "//button[@id='login-button']"
     _xpath_confirmation_identity_button = "//button[@class='Button-sc-qlcn5g-0 fSDtUf']"
     _xpath_dashboard_title = "//div[@class='sc-lijSln iwIpQh']"
+    # Dashboard content
+    _xpath_novo_episodio_a_button = ("//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dt[1]/a["
+                                     "@class='Button-sc-qlcn5g-0 cqSMED' and @aria-label='Criar um novo "
+                                     "episódio')]//span[contains(text(), 'Novo episódio')]")
+    _xpath_inicio_a_button = ("//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Início' and "
+                              "class='Link-sc-7welv8-1 gefhdY styles__StyledNavigationListItem-sc-1c80vy6-11 dsQriY']")
+    _xpath_estatistica_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Estatística'"
+        "and class='Link-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 "
+        "dsQriY']")
+    _xpath_episodios_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Episódios'"
+        "and class='LLink-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 dsQriY']")
+    _xpath_interacao_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Interação'"
+        "and class='Link-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 dsQriY']")
+    _xpath_rentabiliza_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Rentabiliza'"
+        "and class='Link-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 dsQriY']")
+    _xpath_definicoes_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Definições'"
+        "and class='Link-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 "
+        "dsQriY']")
+    _xpath_mensagens_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Mensagens de Domingo'"
+        "and class='Link-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 "
+        "dsQriY']")
+    _xpath_estudos_a_button = (
+        "//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dd[1]/a[aria-label='Estudos Bíblicos da IQC'"
+        "and class='Link-sc-7welv8-1 eNExiu styles__StyledNavigationListItem-sc-1c80vy6-11 "
+        "dsQriY']")
 
     def __init__(self, channel_url):
         self.channel_url = channel_url
@@ -140,8 +172,15 @@ class SpotifyChannel:
             if self.driver.find_element(By.XPATH, self._xpath_dashboard_title).is_displayed():
                 return self.driver.find_element(By.XPATH, self._xpath_dashboard_title).text
 
-    def upload_a_message(self):
-        return null
+    # Upload content to spotify
+    # Needs to verify the type of content to upload (Estudos bíblicos, mensagens)
+    # The last date of content uploaded.
+    # In order to upload, needs:
+    # Mp3 File name path to upload, dates file of the scheduled contents
+    # file names of the structure for the description for Estudo Bíblico
+    # and for the mensagens
+    def upload_content(self, mp3_filename, date_filename):
+        return self
 
     def close_driver(self):
         if self.driver is not None:
