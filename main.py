@@ -18,7 +18,8 @@ def download_youtube_videos():
 
 def upload_spotify_mp3():
     iqc_channel = spotify_channel.SpotifyChannel(variables.IQC_SPOTIFY)
-    iqc_channel.login_spotify(variables.USERNAME, variables.PASSWORD)
+    print(iqc_channel.login_spotify(variables.USERNAME, variables.PASSWORD))
+    # iqc_channel.upload_content("","")
 
 
 if __name__ == "__main__":

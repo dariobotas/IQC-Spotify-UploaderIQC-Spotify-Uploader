@@ -24,16 +24,16 @@ class ContentType(Enum):
 
 
 class SpotifyChannel:
-    _xpath_login_h1 = "//h1[@class='Type__TypeElement-sc-goli3j-0 gMYMSv']"
+    _xpath_login_h1 = "//h1[contains(@class, 'Type__TypeElement-sc-goli3j-0')]"
     _xpath_onetrust_policy_title = "//*[@id=\"onetrust-policy-title\"]"
     _xpath_onetrust_policy_button_permit = "//button[@id=\"onetrust-accept-btn-handler\" and text()=\"Permitir tudo\"]"
-    _xpath_continuar_com_spotify_button = "//button[@class='Button-sc-qlcn5g-0 jxHXTK']"
-    _xpath_iniciar_sessao_title: str = "//h1[@class='Type__TypeElement-sc-goli3j-0 jaaEvK sc-bqWxrE gmSfcE']"
+    _xpath_continuar_com_spotify_button = "//button[contains(@class, 'Button-sc-qlcn5g-0')]"
+    _xpath_iniciar_sessao_title: str = "//h1[contains(@class, 'sc-bqWxrE gmSfcE')]"
     _xpath_username_input = "//input[@id='login-username']"
     _xpath_password_input = "//input[@id='login-password']"
     _xpath_login_button = "//button[@id='login-button']"
-    _xpath_confirmation_identity_button = "//button[@class='Button-sc-qlcn5g-0 fSDtUf']"
-    _xpath_dashboard_title = "//div[@class='sc-lijSln iwIpQh']"
+    _xpath_confirmation_identity_button = "//button[contains(@class, 'Button-sc-qlcn5g-0')]"
+    _xpath_dashboard_title = "//*[@id='app-content']/div/div/div[1]/header/div[2]/div[1]/h1/div"
     # Dashboard content
     _xpath_novo_episodio_a_button = ("//*[@id=\"__chrome\"]//chrome-app/div/nav/div/div/dl/dt[1]/a["
                                      "@class='Button-sc-qlcn5g-0 cqSMED' and @aria-label='Criar um novo "
@@ -163,6 +163,12 @@ class SpotifyChannel:
             self.driver.find_element(By.XPATH, self._xpath_username_input).send_keys(username)
             self.driver.find_element(By.XPATH, self._xpath_password_input).send_keys(password)
             self.driver.find_element(By.XPATH, self._xpath_login_button).click()
+            # If needs to check human verification
+            if (self.driver.find_element(By.XPATH, "//*[@id=\"encore-web-main-content\"]/div/div/div/div/div/div/h1")
+                    .is_displayed()):
+                self.driver.find_element(By.XPATH, "//*[@id=\"recaptcha-anchor\"]/div[1]").click()
+                self.driver.find_element(By.XPATH,
+                                         "//*[@id=\"encore-web-main-content\"]/div/div/div/div/div/div/button").click()
             # Check if the screen shows the confirmation of identity
             self.wait.until(ec.visibility_of_element_located((By.XPATH, self._xpath_confirmation_identity_button)))
             if self.driver.find_element(By.XPATH, self._xpath_confirmation_identity_button).is_displayed():
@@ -180,7 +186,7 @@ class SpotifyChannel:
     # file names of the structure for the description for Estudo Bíblico
     # and for the mensagens
     def upload_content(self, mp3_filename, date_filename):
-        return self
+        print(self.login_spotify())
 
     def close_driver(self):
         if self.driver is not None:
